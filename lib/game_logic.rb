@@ -8,95 +8,93 @@
 
 
 class Game
-    def initialize
-        @word = File.readlines("words.txt", chomp:true).sample
-        until @word.length > 4 && @word.length < 13
-            @word = File.readlines("words.txt", chomp:true).sample
-        end
-        @player = Player.new
-        @guesses = @word.length + 5
-        @hidden_word = Array.new(@word.length, "-")
-        @guessed_letters = ''
+  def initialize
+    @word = File.readlines('words.txt', chomp:true).sample
+    until @word.length > 4 && @word.length < 13
+      @word = File.readlines('words.txt', chomp:true).sample
+    end
+    @player = Player.new
+    @guesses = @word.length + 5
+    @hidden_word = Array.new(@word.length, "-")
+    @guessed_letters = ''
+  end
+
+  def round
+    puts @hidden_word.join(' ')
+    puts @guessed_letters
+
+    guess = @player.guess_letter(@word)
+    if guess == @word
+      puts 'you win'
+      return
     end
 
-    def round
-        puts @hidden_word.join(" ")
-        puts @guessed_letters
+    return if check_repeat(guess)
 
-        guess = @player.guess_letter(@word)
-        if guess == @word
-            puts 'you win'
-            return
-        end
+    check_guess(guess)
+    
 
-        return if check_repeat(guess)
+    @guesses -= 1
+    puts "\n#{@guesses} left"
+  end 
 
-        check_guess(guess)
-        
-
-        @guesses -= 1
-        puts "\n#{@guesses} left"
-    end 
-
-    def play
-        while @guesses > 0
-            self.round
-            if @hidden_word.join == @word
-                puts 'You got the word!'
-                return
-            end
-        end
-        p @word
+  def play
+    while @guesses.positive?
+      self.round
+      if @hidden_word.join == @word
+        puts 'You got the word!'
+        return
+      end
     end
+    p @word
+  end
 
-    def check_repeat(guess)
-        if @guessed_letters.include?(guess)
-            puts 'Already guessed this letter, guess again'
-            return true
-        else 
-            return false
-        end
+  def check_repeat(guess)
+    if @guessed_letters.include?(guess)
+      puts 'Already guessed this letter, guess again'
+      return true
+    else 
+      return false
     end
+  end
 
-    def check_guess(guess)
-        @guessed_letters += guess
-        if @word.include?(guess)
-            replace_letter(guess)
-        else
-            puts 'Letter not found'
-        end
+  def check_guess(guess)
+    @guessed_letters += guess
+    if @word.include?(guess)
+      replace_letter(guess)
+    else
+      puts 'Letter not found'
     end
+  end
 
-    def replace_letter(guess)
-        @word.split('').each_with_index do |letter, index|
-            if letter == guess
-                @hidden_word[index] = guess 
-            end
-        end
-    end 
+  def replace_letter(guess)
+    @word.split('').each_with_index do |letter, index|
+      if letter == guess
+        @hidden_word[index] = guess 
+      end
+    end
+  end 
 end
 
 class Player
-
-    def guess_letter(word)
-        letter = gets.chomp.downcase
-        if letter == word
-            return letter
-        end
-        if letter.length > 1
-            puts 'Invalid guess, guess 1 letter'
-            self.guess_letter
-        elsif !letter?(letter) 
-            puts 'Invalid guess, guess a letter'
-            self.guess_letter
-        end
-        letter
+  def guess_letter(word)
+    letter = gets.chomp.downcase
+    if letter == word
+      return letter
     end
-
-    def letter?(char)
-        char =~ /[A-Za-z]/
+    if letter.length > 1
+      puts 'Invalid guess, guess 1 letter'
+      self.guess_letter
+    elsif !letter?(letter) 
+      puts 'Invalid guess, guess a letter'
+      self.guess_letter
     end
+    letter
+  end
+
+  def letter?(char)
+    char =~ /[A-Za-z]/
+  end
 end
-
 
 game = Game.new.play
