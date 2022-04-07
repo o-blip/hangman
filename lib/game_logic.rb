@@ -5,35 +5,31 @@
 # 5. show guessed letters
 # 6. if out of guess, player loses
 # 7. add serialize functionality (save game state and option to load in the beginning)
-
+require_relative 'display'
 
 class Game
   def initialize
-    @word = File.readlines('words.txt', chomp:true).sample
-    until @word.length > 4 && @word.length < 13
-      @word = File.readlines('words.txt', chomp:true).sample
-    end
+    @word = choose_word()
     @player = Player.new
-    @guesses = @word.length + 5
+    @wrong = 0
     @hidden_word = Array.new(@word.length, "-")
     @guessed_letters = ''
+    @display = Board.new
+  end
+
+  def choose_word
+    word = File.readlines('words.txt', chomp: true).sample
+    word = File.readlines('words.txt', chomp: true).sample until word.length > 4 && @word.length < 13
+    word
   end
 
   def round
-    puts @hidden_word.join(' ')
-    puts @guessed_letters
 
     guess = @player.guess_letter(@word)
-    if guess == @word
-      puts 'you win'
-      return
-    end
 
     return if check_repeat(guess)
 
     check_guess(guess)
-    
-
     @guesses -= 1
     puts "\n#{@guesses} left"
   end 
